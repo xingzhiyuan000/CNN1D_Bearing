@@ -25,7 +25,7 @@ class CNN1D(nn.Module):
         # 512X200-512X100  通道X信号尺寸
         self.pool3 = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
         # 100-----13
-        self.fc1 = nn.Linear(in_features=100, out_features=13, bias=True)
+        self.fc1 = nn.Linear(in_features=512*100, out_features=13, bias=True)
 
     def forward(self, x):
         x = F.relu(self.bn1(self.conv1(x)))

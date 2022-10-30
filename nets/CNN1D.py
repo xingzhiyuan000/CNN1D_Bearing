@@ -24,6 +24,8 @@ class CNN1D(nn.Module):
         self.bn3 = nn.BatchNorm1d(num_features=512)
         # 512X200-512X100  通道X信号尺寸
         self.pool3 = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
+        # 将数据展平
+        self.flatten = nn.Flatten()
         # 100-----13
         self.fc1 = nn.Linear(in_features=512*100, out_features=13, bias=True)
 
@@ -34,6 +36,7 @@ class CNN1D(nn.Module):
         x = self.pool2(x)
         x = F.relu(self.bn3(self.conv3(x)))
         x = self.pool3(x)
+        x = self.flatten(x)
         x = self.fc1(x)
         return x
 

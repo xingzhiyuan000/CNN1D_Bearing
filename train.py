@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 from torch import nn
 from torch.distributions import transforms
-from torch.optim import Adam
+from torch.optim import Adam, lr_scheduler
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -73,6 +73,7 @@ loss_fn=loss_fn.to(device) #将损失函数加载到cuda上训练
 
 #optimizer=torch.optim.SGD(wang.parameters(),lr=learing_rate)
 optimizer = Adam(wang.parameters(), lr=learing_rate)  # 选用AdamOptimizer
+scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9) #使用学习率指数连续衰减
 
 #设置训练网络的一些参数
 total_train_step=0 #记录训练的次数
@@ -103,6 +104,10 @@ for i in range(epoch):
         if total_train_step%10==0:
             print("总训练次数: {},损失值Loss: {}".format(total_train_step,loss.item()))
             writer.add_scalar("train_loss",loss.item(),global_step=total_train_step)
+    if i % 5 == 0:
+        scheduler.step()
+    current_learn_rate=optimizer.state_dict()['param_groups'][0]['lr']
+    print("当前学习率：", current_learn_rate)
 
     #一轮训练后，进行测试
     wang.eval()
@@ -132,8 +137,8 @@ for i in range(epoch):
     filepath = os.path.join(save_path, "wang_{}_{}.pth".format(time_str,i+1))
     if (i+1) % save_epoch == 0:
         torch.save(wang,filepath) #保存训练好的模型
-    if(i>60): #若迭代次数大于60则降低学习率
-        learing_rate = 1e-4  # 学习速率
+    # if(i>60): #若迭代次数大于60则降低学习率
+    #     learing_rate = 1e-4  # 学习速率
 
 writer.close() #关闭tensorboard
 
